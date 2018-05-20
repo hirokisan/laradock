@@ -17,6 +17,17 @@ RUN apk update \
     && apk add --no-cache bash \
     && adduser -D -H -u 1000 -s /bin/bash www-data
 
+		# install openssl
+RUN apk add --no-cache openssl
+
+# create a folder for the keys
+RUN mkdir /etc/nginx/ssl 2> /dev/null
+
+# generate the keys for your local domain
+RUN openssl genrsa -out "/etc/nginx/ssl/guchiatsume.key" 2048 \
+    && openssl req -new -key "/etc/nginx/ssl/guchiatsume.key" -out "/etc/nginx/ssl/guchiatsume.csr" -subj "/CN=guchiatsume/O=YOURCOMPANYNAME/C=UK" \
+    && openssl x509 -req -days 365 -in "/etc/nginx/ssl/guchiatsume.csr" -signkey "/etc/nginx/ssl/guchiatsume.key" -out "/etc/nginx/ssl/guchiatsume.crt"
+
 ARG PHP_UPSTREAM_CONTAINER=php-fpm
 ARG PHP_UPSTREAM_PORT=9000
 
